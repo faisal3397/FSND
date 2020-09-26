@@ -33,46 +33,55 @@ class Venue(db.Model):
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    genres = db.Column(db.String(120))
+    name = db.Column(db.String, unique=True, nullable=False)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    past_shows_count = db.Column(db.Integer)
-    upcoming_shows_count = db.Column(db.Integer)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    genres = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+    website = db.Column(db.String(120))
+    past_shows = db.relationship('Show', backref='past_venue', collection_class=list)
+    past_shows_count = db.Column(db.Integer)
+    upcoming_shows = db.relationship('Show', backref='upcoming_venue', collection_class=list)
+    upcoming_shows_count = db.Column(db.Integer)
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True, nullable=False)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
+    image_link = db.Column(db.String(500), unique=True)
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    website = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+    past_shows = db.relationship('Show', backref='past_artist', collection_class=list)
+    past_shows_count = db.Column(db.Integer)
+    upcoming_shows = db.relationship('Show', backref='upcoming_artist', collection_class=list)
+    upcoming_shows_count = db.Column(db.Integer)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Show(db.Model):
   __tablename__ = 'Show'
 
   id = db.Column(db.Integer, primary_key=True)
-  venue_id = db.Column(db.Integer)
-  venue_name = db.Column(db.String)
-  artist_id = db.Column(db.Integer)
-  artist_name = db.Column(db.String)
-  artist_image_link = db.Column(db.String(500))
+  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+  venue_name = db.Column(db.String, db.ForeignKey('Venue.name'), nullable=False)
+  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+  artist_name = db.Column(db.String, db.ForeignKey('Artist.name'), nullable=False)
+  artist_image_link = db.Column(db.String(500), db.ForeignKey('Artist.image_link'), nullable=False)
   start_time = db.Column(db.DateTime)
 #----------------------------------------------------------------------------#
 # Filters.
