@@ -13,6 +13,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+# to generate random integers when inserting an object to DB
+import random 
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -245,13 +247,56 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  print(request.form)
+  error = False
+  try:
+    id = random.randint(0, 9999)
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    address = request.form['address']
+    phone = request.form['phone']
+    image_link = request.form['image_link']
+    facebook_link = request.form['facebook_link']
+    genres = request.form['genres']
+    website = request.form['website']
+    seeking_talent = request.form['seeking_talent']
+    seeking_description = request.form['seeking_description']
+
+    
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+    venue = Venue(
+      id=id, 
+      name=name, 
+      city=city, 
+      state=state, 
+      address=address, 
+      phone=phone, 
+      image_link=image_link, 
+      facebook_link=facebook_link, 
+      genres=genres, 
+      website=website,
+      seeking_talent=seeking_talent,
+      seeking_description=seeking_description
+    )
+    print(venue)
+    db.session.add(venue)
+    db.session.commit()
+  except():
+    db.session.rollback()
+    error = True
+  finally:
+    db.session.close()
+  if error:
+    # TODO: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    flash('Venue ' + request.form['name'] + ' was not listed due to some error!')
+  else:
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
 
