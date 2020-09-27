@@ -251,17 +251,17 @@ def create_venue_submission():
   error = False
   try:
     id = random.randint(0, 9999)
-    name = request.form['name']
-    city = request.form['city']
-    state = request.form['state']
-    address = request.form['address']
-    phone = request.form['phone']
-    image_link = request.form['image_link']
-    facebook_link = request.form['facebook_link']
-    genres = request.form['genres']
-    website = request.form['website']
-    seeking_talent = request.form['seeking_talent']
-    seeking_description = request.form['seeking_description']
+    name = request.form.get("name")
+    city = request.form.get("city")
+    state = request.form.get("state")
+    address = request.form.get("address")
+    phone = request.form.get("phone")
+    image_link = request.form.get("image_link")
+    facebook_link = request.form.get("facebook_link")
+    genres = request.form.get("genres")
+    website = request.form.get("website")
+    seeking_talent = request.form.get("seeking_talent")
+    seeking_description = request.form.get("seeking_description")
 
     
   # TODO: insert form data as a new Venue record in the db, instead
