@@ -15,6 +15,10 @@ from flask_wtf import Form
 from forms import *
 # to generate random integers when inserting an object to DB
 import random 
+# to trace the last error
+import sys
+# to compare dates
+from datetime import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -44,45 +48,52 @@ shows = db.Table('shows',
 )
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+  __tablename__ = 'Venue'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500), unique=True)
-    facebook_link = db.Column(db.String(120))
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String, unique=True, nullable=False)
+  city = db.Column(db.String(120))
+  state = db.Column(db.String(120))
+  address = db.Column(db.String(120))
+  phone = db.Column(db.String(120))
+  image_link = db.Column(db.String(500), unique=True)
+  facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    genres = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-    website = db.Column(db.String(120))
-    past_shows = db.relationship('Artist', secondary=shows, backref= db.backref('past_shows', lazy=True))
-    past_shows_count = db.Column(db.Integer)
-    upcoming_shows = db.relationship('Artist', secondary=shows, backref= db.backref('upcoming_shows', lazy=True))
-    upcoming_shows_count = db.Column(db.Integer)
+  # TODO: implement any missing fields, as a database migration using Flask-Migrate
+  genres = db.Column(db.String(120))
+  seeking_talent = db.Column(db.Boolean)
+  seeking_description = db.Column(db.String(500))
+  website = db.Column(db.String(120))
+  past_shows = db.relationship('Artist', secondary=shows, backref= db.backref('past_shows', lazy=True))
+  past_shows_count = db.Column(db.Integer)
+  upcoming_shows = db.relationship('Artist', secondary=shows, backref= db.backref('upcoming_shows', lazy=True))
+  upcoming_shows_count = db.Column(db.Integer)
+
+  def __repr__(self):
+    return f'<Venue ID: {self.id}, Name: {self.name}>'
+
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+  __tablename__ = 'Artist'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500), unique=True)
-    facebook_link = db.Column(db.String(120))
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String, unique=True, nullable=False)
+  city = db.Column(db.String(120))
+  state = db.Column(db.String(120))
+  phone = db.Column(db.String(120))
+  genres = db.Column(db.String(120))
+  image_link = db.Column(db.String(500), unique=True)
+  facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-    website = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-    past_shows_count = db.Column(db.Integer)
-    upcoming_shows_count = db.Column(db.Integer)
+  # TODO: implement any missing fields, as a database migration using Flask-Migrate
+  website = db.Column(db.String(120))
+  seeking_venue = db.Column(db.Boolean)
+  seeking_description = db.Column(db.String(500))
+  past_shows_count = db.Column(db.Integer)
+  upcoming_shows_count = db.Column(db.Integer)
+
+  def __repr__(self):
+    return f'<Artist ID: {self.id}, Name: {self.name}>'
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -245,7 +256,9 @@ def create_venue_form():
   return render_template('forms/new_venue.html', form=form)
 
 @app.route('/venues/create', methods=['POST'])
-def create_venue_submission():
+def create_venue_submission():    
+  # TODO: insert form data as a new Venue record in the db, instead
+  # TODO: modify data to be the data object returned from db insertion
   print(request.form)
   error = False
   try:
@@ -259,12 +272,14 @@ def create_venue_submission():
     facebook_link = request.form.get("facebook_link")
     genres = request.form.get("genres")
     website = request.form.get("website")
-    seeking_talent = request.form.get("seeking_talent")
-    seeking_description = request.form.get("seeking_description")
 
+    if request.form.get("seeking_talent") == 'y':
+      seeking_talent = True
+      seeking_description = request.form.get("seeking_description")
+    else:
+      seeking_talent = False
+      seeking_description = ''
     
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
     venue = Venue(
       id=id, 
       name=name, 
@@ -277,14 +292,15 @@ def create_venue_submission():
       genres=genres, 
       website=website,
       seeking_talent=seeking_talent,
-      seeking_description=seeking_description
+      seeking_description=seeking_description,
     )
     print(venue)
     db.session.add(venue)
     db.session.commit()
   except():
-    db.session.rollback()
     error = True
+    db.session.rollback()
+    print(sys.exc_info())
   finally:
     db.session.close()
   if error:
