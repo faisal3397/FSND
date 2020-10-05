@@ -37,15 +37,16 @@ migrate = Migrate(app, db)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
-shows = db.Table('shows',
-  db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key = True),
-  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key = True),
-  db.Column('venue_name', db.String, db.ForeignKey('Venue.name'), unique=True, nullable=False),
-  db.Column('artist_name', db.String, db.ForeignKey('Artist.name'), unique=True, nullable=False),
-  db.Column('venue_image_link', db.String(500), db.ForeignKey('Venue.image_link'), unique=True),
-  db.Column('artist_image_link', db.String(500), db.ForeignKey('Artist.image_link'), unique=True),
-  db.Column('start_time', db.DateTime())
-)
+class Show(db.Model):
+  __tablename__ = 'Show'
+  id = db.Column(db.Integer, primary_key=True)
+  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'))
+  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'))
+  venue_name = db.Column(db.String, db.ForeignKey('Venue.name'), unique=True, nullable=False)
+  artist_name = db.Column(db.String, db.ForeignKey('Artist.name'), unique=True, nullable=False)
+  venue_image_link = db.Column(db.String(500), db.ForeignKey('Venue.image_link'), unique=True)
+  artist_image_link = db.Column(db.String(500), db.ForeignKey('Artist.image_link'), unique=True)
+  start_time = db.Column(db.DateTime())
 
 class Venue(db.Model):
   __tablename__ = 'Venue'
@@ -64,9 +65,9 @@ class Venue(db.Model):
   seeking_talent = db.Column(db.Boolean)
   seeking_description = db.Column(db.String(500))
   website = db.Column(db.String(120))
-  past_shows = db.relationship('Artist', secondary=shows, backref= db.backref('past_shows', lazy=True))
+  past_shows = db.relationship('Show', backref='past_venues', primaryjoin="and_(Venue.id==Show.venue_id, Show.start_time < func.current_date())")
   past_shows_count = db.Column(db.Integer)
-  upcoming_shows = db.relationship('Artist', secondary=shows, backref= db.backref('upcoming_shows', lazy=True))
+  upcoming_shows = db.relationship('Show', backref='upcoming_venues', primaryjoin="and_(Venue.id==Show.venue_id, Show.start_time >= func.current_date())")
   upcoming_shows_count = db.Column(db.Integer)
 
   def __repr__(self):
@@ -89,7 +90,9 @@ class Artist(db.Model):
   website = db.Column(db.String(120))
   seeking_venue = db.Column(db.Boolean)
   seeking_description = db.Column(db.String(500))
+  past_shows = db.relationship('Show', backref='past_artists', primaryjoin="and_(Artist.id==Show.artist_id, Show.start_time < func.current_date())")
   past_shows_count = db.Column(db.Integer)
+  upcoming_shows = db.relationship('Show', backref='upcoming_artists', primaryjoin="and_(Artist.id==Show.artist_id, Show.start_time >= func.current_date())")
   upcoming_shows_count = db.Column(db.Integer)
 
   def __repr__(self):
@@ -125,6 +128,8 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
+  venues = Venue.query.all()
+  print(venues)
   data=[{
     "city": "San Francisco",
     "state": "CA",
