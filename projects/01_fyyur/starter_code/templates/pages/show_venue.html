@@ -11,7 +11,9 @@
 		</p>
 		<div class="genres">
 			{% for genre in venue.genres %}
-			<span class="genre">{{ genre }}</span>
+				{% if genre != ''%}
+					<span class="genre">{{ genre }}</span>
+				{% endif %}
 			{% endfor %}
 		</div>
 		<p>
