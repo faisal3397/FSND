@@ -71,7 +71,7 @@ class Venue(db.Model):
   upcoming_shows_count = db.Column(db.Integer)
 
   def __repr__(self):
-    return f'<Venue ID: {self.id}, Name: {self.name}>'
+    return f'<Venue ID: {self.id}, \n Name: {self.name}, \n City: {self.city}, \n State: {self.state}, \n Address: {self.address}, \n Phone: {self.phone}, \n Genres: {self.genres} \n ----------------------------->'
 
 
 class Artist(db.Model):
@@ -96,7 +96,7 @@ class Artist(db.Model):
   upcoming_shows_count = db.Column(db.Integer)
 
   def __repr__(self):
-    return f'<Artist ID: {self.id}, Name: {self.name}>'
+    return f'<Artist ID: {self.id}, \n Name: {self.name}, \n City: {self.city}, \n State: {self.state}, \n Address: {self.address}, \n Phone: {self.phone}, \n Genres: {self.genres} \n ----------------------------->'
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -129,28 +129,42 @@ def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
   venues = Venue.query.all()
-  print(venues)
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  data = []
+  for venue in venues:
+    if len(data) > 0:
+      for venues_city in data:
+        if venues_city['city'] == venue.city:
+          venues_city['venues'].append({
+            "id": venue.id,
+            "name": venue.name,
+            "num_upcoming_shows": len(venue.upcoming_shows)
+          })
+          break
+        else:
+          venues_city = {
+            "city": venue.city,
+            "state": venue.state,
+            "venues": [{
+              "id": venue.id,
+              "name": venue.name,
+              "num_upcoming_shows": len(venue.upcoming_shows)
+            }]
+          }
+          data.append(venues_city)
+          break
+    else:
+      venues_city = {
+        "city": venue.city,
+        "state": venue.state,
+        "venues": [{
+          "id": venue.id,
+          "name": venue.name,
+          "num_upcoming_shows": len(venue.upcoming_shows)
+        }]
+      }
+      data.append(venues_city)
+
+
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
