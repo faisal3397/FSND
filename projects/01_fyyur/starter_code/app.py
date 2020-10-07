@@ -254,7 +254,6 @@ def create_venue_submission():
       seeking_talent=seeking_talent,
       seeking_description=seeking_description,
     )
-    print(venue)
     db.session.add(venue)
     db.session.commit()
   except():
@@ -282,7 +281,22 @@ def delete_venue(venue_id):
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  error = False
+  try:
+    venue = Venue.query.get(venue_id)
+    db.session.delete(venue)
+    db.session.commit()
+  except():
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    flash('Venue ' + venue.name + ' was not deleted due to some error!')
+  else:
+    flash('Venue ' + venue.name + ' was successfully deleted!')
+  return render_template('pages/home.html')
 
 #  Artists
 #  ----------------------------------------------------------------
