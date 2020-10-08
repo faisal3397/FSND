@@ -7,6 +7,6 @@ function deleteVenue(venueId) {
   console.log("Button Clicked", venueId);
   fetch(`/venues/${venueId}`, {
     method: 'DELETE'
-  }).then((response) => console.log(response))
+  }).then((response) => window.location.href='/')
   .catch((err) => console.log(err))
 };

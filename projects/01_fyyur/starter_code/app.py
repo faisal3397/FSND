@@ -296,6 +296,8 @@ def delete_venue(venue_id):
     flash('Venue ' + venue.name + ' was not deleted due to some error!')
   else:
     flash('Venue ' + venue.name + ' was successfully deleted!')
+
+
   return render_template('pages/home.html')
 
 #  Artists
