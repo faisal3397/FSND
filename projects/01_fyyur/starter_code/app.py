@@ -197,6 +197,8 @@ def show_venue(venue_id):
   # TODO: replace with real venue data from the venues table, using venue_id
   venue = Venue.query.get(venue_id)
   venue.genres = re.split('{|}|,', venue.genres) # split genres to remove unwanted delimeters e.g."{","}",","
+  print(venue.past_shows)
+  print(venue.upcoming_shows)
   data={
     "id": venue.id,
     "name": venue.name,
