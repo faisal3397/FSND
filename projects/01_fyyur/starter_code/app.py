@@ -130,7 +130,9 @@ def venues():
   #       num_shows should be aggregated based on number of upcoming shows per venue.
   venues = Venue.query.all()
   data = []
+
   for venue in venues:
+    city_found = False
     if len(data) > 0:
       for venues_city in data:
         if venues_city['city'] == venue.city:
@@ -139,19 +141,24 @@ def venues():
             "name": venue.name,
             "num_upcoming_shows": len(venue.upcoming_shows)
           })
+          city_found = True
           break
         else:
-          venues_city = {
-            "city": venue.city,
-            "state": venue.state,
-            "venues": [{
-              "id": venue.id,
-              "name": venue.name,
-              "num_upcoming_shows": len(venue.upcoming_shows)
-            }]
-          }
-          data.append(venues_city)
-          break
+          # continue until we find the venue's city in data list
+          continue
+      # if the loop is done, and we didn't find the venue's city in data list, 
+      # then we'll create and append the venue's city to the data list
+      if not city_found:
+        venues_city = {
+          "city": venue.city,
+          "state": venue.state,
+          "venues": [{
+            "id": venue.id,
+            "name": venue.name,
+            "num_upcoming_shows": len(venue.upcoming_shows)
+          }]
+        }
+        data.append(venues_city)
     else:
       venues_city = {
         "city": venue.city,
