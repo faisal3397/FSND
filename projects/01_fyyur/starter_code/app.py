@@ -525,11 +525,53 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+  error = False
+  try:
+    id = random.randint(0, 9999)
+    name = request.form.get("name")
+    city = request.form.get("city")
+    state = request.form.get("state")
+    phone = request.form.get("phone")
+    image_link = request.form.get("image_link")
+    facebook_link = request.form.get("facebook_link")
+    genres = request.form.getlist("genres")
+    website = request.form.get("website")
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    if request.form.get("seeking_venue") == 'y':
+      seeking_venue = True
+      seeking_description = request.form.get("seeking_description")
+    else:
+      seeking_venue = False
+      seeking_description = ''
+    
+    artist = Artist(
+      id=id, 
+      name=name, 
+      city=city, 
+      state=state, 
+      phone=phone, 
+      image_link=image_link, 
+      facebook_link=facebook_link, 
+      genres=genres, 
+      website=website,
+      seeking_venue=seeking_venue,
+      seeking_description=seeking_description,
+    )
+    db.session.add(artist)
+    db.session.commit()
+  except():
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    # TODO: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    flash('Artist ' + request.form['name'] + ' was not listed due to some error!')
+  else:
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
   return render_template('pages/home.html')
 
 
