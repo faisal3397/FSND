@@ -19,6 +19,8 @@ import random
 import sys
 # to split genres string by multiple delimeters
 import re
+# to compare dates
+from datetime import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -615,12 +617,48 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
+  error = False
 
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
+  try:
+    id = random.randint(0, 9999)
+    venue_id = request.form.get('venue_id')
+    artist_id = request.form.get('artist_id')
+    venue = Venue.query.get(venue_id)
+    artist = Artist.query.get(artist_id)
+
+    venue_name = venue.name
+    artist_name = artist.name
+    venue_image_link = venue.image_link
+    artist_image_link = artist.image_link
+    start_time = request.form.get('start_time')
+    # convert start_time from string to timestamp
+    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+    show = Show(
+      id=id,
+      venue_id=venue_id,
+      artist_id=artist_id,
+      venue_name=venue_name,
+      artist_name=artist_name,
+      venue_image_link=venue_image_link,
+      artist_image_link=artist_image_link,
+      start_time = start_time
+    )
+    db.session.add(show)
+    db.session.commit()
+  except():
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+
   # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  if error:
+    flash('An error occurred. Show could not be listed.')
+  else:
+    # on successful db insert, flash success
+    flash('Show was successfully listed!')
+
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
