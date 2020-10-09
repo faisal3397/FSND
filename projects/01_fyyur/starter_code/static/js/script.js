@@ -13,3 +13,7 @@ function deleteVenue(venueId) {
 function editVenue(venueId) {
   window.location.href = `/venues/${venueId}/edit`
 }
+
+function editArtist(artistId) {
+  window.location.href = `/artists/${artistId}/edit`
+}
