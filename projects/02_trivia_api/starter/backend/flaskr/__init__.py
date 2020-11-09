@@ -57,6 +57,9 @@ def create_app(test_config=None):
     categories = Category.query.all()
     result_questions = []
     result_categories = {}
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
 
     for category in categories:
       result_categories[category.format()["id"]] = category.format()["type"]
@@ -67,7 +70,7 @@ def create_app(test_config=None):
     result_current_category = categories[random.randrange(0,6)].format()
 
     return jsonify({
-      'questions': result_questions,
+      'questions': result_questions[start:end],
       'totalQuestions': len(result_questions),
       'categories': result_categories,
       'currentCategory': result_current_category
