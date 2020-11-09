@@ -119,7 +119,26 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  @app.route('/questions/search', methods=['POST'])
+  def search_questions():
+    result_questions = []
+    search_term=request.json["searchTerm"]
+    # add %% before and after search term to get all the results that has the search term in their names
+    search = "%{}%".format(search_term)
+    questions = Question.query.filter(Question.question.ilike(search)).all()
+    for question in questions:
+      result_questions.append(question.format())
 
+    result_current_category = {}
+    categories = Category.query.all()
+    current_category = categories[random.randrange(0,6)].format()
+    result_current_category[current_category["id"]] = current_category["type"]
+
+    return jsonify({
+      "questions": result_questions,
+      "totalQuestions": len(result_questions),
+      "currentCategory": result_current_category
+    })
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
