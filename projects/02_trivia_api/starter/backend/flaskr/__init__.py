@@ -174,7 +174,6 @@ def create_app(test_config=None):
   def play_quiz():
     previous_questions = request.json["previous_questions"]
     quiz_category = request.json["quiz_category"]
-    print(request.json)
 
     category = Category.query.get(quiz_category["id"]).format()
     questions = Question.query.filter_by(category = category["id"])
@@ -192,8 +191,39 @@ def create_app(test_config=None):
   '''
   @TODO: 
   Create error handlers for all expected errors 
-  including 404 and 422. 
+  including 400, 404, 422 and 500.
   '''
+  @app.errorhandler(404)
+  def not_found(error):
+      return jsonify({
+          "success": False, 
+          "error": 404,
+          "message": "Not found"
+          }), 404
+
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+          "success": False, 
+          "error": 400,
+          "message": "Bad Request"
+          }), 400
+
+  @app.errorhandler(422)
+  def unprocessable_entity(error):
+      return jsonify({
+          "success": False, 
+          "error": 422,
+          "message": "Unprocessable Entity"
+          }), 422
+  
+  @app.errorhandler(500)
+  def server_error(error):
+      return jsonify({
+          "success": False, 
+          "error": 500,
+          "message": "Internal Server Error"
+          }), 500
   
   return app
 
