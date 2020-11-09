@@ -67,13 +67,15 @@ def create_app(test_config=None):
     for question in questions:
       result_questions.append(question.format())
 
-    result_current_category = categories[random.randrange(0,6)].format()
+    result_current_category = {}
+    current_category = categories[random.randrange(0,6)].format()
+    result_current_category[current_category["id"]] = current_category["type"]
 
     return jsonify({
       'questions': result_questions[start:end],
-      'totalQuestions': len(result_questions),
+      'total_questions': len(result_questions),
       'categories': result_categories,
-      'currentCategory': result_current_category
+      'current_category': result_current_category
     })
   '''
   @TODO: 
