@@ -153,7 +153,6 @@ def create_app(test_config=None):
     questions = Question.query.filter_by(category = category["id"])
     formatted_questions = [question.format() for question in questions]
 
-    print(formatted_questions)
     return jsonify({
       "questions": formatted_questions,
       "totalQuestions": len(formatted_questions),
@@ -171,7 +170,25 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def play_quiz():
+    previous_questions = request.json["previous_questions"]
+    quiz_category = request.json["quiz_category"]
+    print(request.json)
 
+    category = Category.query.get(quiz_category["id"]).format()
+    questions = Question.query.filter_by(category = category["id"])
+    formatted_questions = [question.format() for question in questions]
+    random_question = {}
+
+    for question in formatted_questions:
+      if question["id"] not in previous_questions:
+        random_question = question
+
+
+    return jsonify({
+      "question": random_question
+    })
   '''
   @TODO: 
   Create error handlers for all expected errors 
