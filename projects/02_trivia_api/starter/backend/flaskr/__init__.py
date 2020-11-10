@@ -8,6 +8,23 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+# a helper method that formats the categories, returns a dictionary that holds all the categories, so that it can be handled in client-side
+def get_result_categories(categories):
+  result_categories = {}
+  formatted_categories = [category.format() for category in categories]
+
+  for category in formatted_categories:
+    result_categories[category["id"]] = category["type"]
+    
+  return result_categories
+
+def get_current_category(categories):
+  result_current_category = {}
+  current_category = categories[random.randrange(0,6)].format()
+  result_current_category[current_category["id"]] = current_category["type"]
+
+  return result_current_category
+
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
@@ -33,10 +50,7 @@ def create_app(test_config=None):
   @app.route('/categories')
   def get_categories():
     categories = Category.query.all()
-    response_data = {}
-
-    for category in categories:
-      response_data[category.format()["id"]] = category.format()["type"]
+    response_data = get_result_categories(categories)
 
     return jsonify({'categories': response_data})
   '''
@@ -55,21 +69,13 @@ def create_app(test_config=None):
   def get_questions():
     questions = Question.query.all()
     categories = Category.query.all()
-    result_questions = []
-    result_categories = {}
+    result_questions = [question.format() for question in questions]
+    result_categories = get_result_categories(categories)
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
-    for category in categories:
-      result_categories[category.format()["id"]] = category.format()["type"]
-
-    for question in questions:
-      result_questions.append(question.format())
-
-    result_current_category = {}
-    current_category = categories[random.randrange(0,6)].format()
-    result_current_category[current_category["id"]] = current_category["type"]
+    result_current_category = get_current_category(categories)
 
     return jsonify({
       'questions': result_questions[start:end],
@@ -121,18 +127,13 @@ def create_app(test_config=None):
   '''
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
-    result_questions = []
     search_term=request.json["searchTerm"]
     # add %% before and after search term to get all the results that has the search term in their names
     search = "%{}%".format(search_term)
     questions = Question.query.filter(Question.question.ilike(search)).all()
-    for question in questions:
-      result_questions.append(question.format())
-
-    result_current_category = {}
+    result_questions = [question.format() for question in questions]
     categories = Category.query.all()
-    current_category = categories[random.randrange(0,6)].format()
-    result_current_category[current_category["id"]] = current_category["type"]
+    result_current_category = get_current_category(categories)
 
     return jsonify({
       "questions": result_questions,
