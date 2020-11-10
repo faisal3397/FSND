@@ -72,15 +72,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Not found")
         self.assertEqual(data["success"], False)
 
-    # def test_delete_question(self):
-    #     res = self.client().delete('/questions/39')
-    #     data = json.loads(res.data)
+    def test_delete_question(self):
+        res = self.client().delete('/questions/39')
+        data = json.loads(res.data)
 
-    #     question = Question.query.filter(Question.id == 24).one_or_none()
+        question = Question.query.filter(Question.id == 24).one_or_none()
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data["message"], "Question Deleted")
-    #     self.assertEqual(question, None)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["message"], "Question Deleted")
+        self.assertEqual(question, None)
     
     def test_404_if_question_does_not_exist(self):
         res = self.client().delete('/questions/1000')
