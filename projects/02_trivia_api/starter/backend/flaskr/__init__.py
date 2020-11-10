@@ -105,7 +105,7 @@ def create_app(test_config=None):
 
       question.delete()
       return jsonify({'message': 'Question Deleted'})
-    except:
+    except():
       abort(422)
   '''
   @TODO: 
@@ -119,17 +119,21 @@ def create_app(test_config=None):
   '''
   @app.route('/questions', methods=['POST'])
   def create_question():
-    question = request.json["question"]
-    answer = request.json["answer"]
-    category = request.json["category"]# request.json["category"] will be an integer which is the category id 
-    difficulty = request.json["difficulty"]
+    body = request.get_json()
+    question = body.get("question", None)
+    answer = body.get("answer", None)
+    category = body.get("category", None)
+    difficulty = body.get("difficulty", None)
+
+    if question == None or answer == None or category == None or difficulty == None:
+      abort(400)
 
     try:
       question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
       question.insert()
       return jsonify({'message': 'Question Created'}), 201
-    except:
-      abort(422)
+    except():
+      abort(400)
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 

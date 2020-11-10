@@ -18,6 +18,18 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
+        self.new_question = {
+            "question": "TEST Question",
+            "answer": "TEST Answer",
+            "difficulty": 3,
+            "category": 6
+        }
+
+        self.bad_request_question = {
+            "question": "TEST Question",
+            "answer": "TEST Answer"
+        }
+
         # binds the app to the current context
         with self.app.app_context():
             self.db = SQLAlchemy()
@@ -33,6 +45,69 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+
+    def test_get_all_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["categories"])
+
+    def test_get_all_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["categories"])
+        self.assertTrue(data["current_category"])
+        self.assertTrue(data["questions"])
+        self.assertTrue(data["total_questions"])
+    
+    def test_404_get_questions_beyond_valid_page(self):
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["error"], 404)
+        self.assertEqual(data["message"], "Not found")
+        self.assertEqual(data["success"], False)
+
+    def test_delete_question(self):
+        res = self.client().delete('/questions/39')
+        data = json.loads(res.data)
+
+        question = Question.query.filter(Question.id == 24).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["message"], "Question Deleted")
+        self.assertEqual(question, None)
+    
+    def test_404_if_question_does_not_exist(self):
+        res = self.client().delete('/questions/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["error"], 404)
+        self.assertEqual(data["message"], "Not found")
+        self.assertEqual(data["success"], False)
+    
+    def test_create_new_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(data["message"], "Question Created")
+    
+    def test_400_create_question_bad_request(self):
+        res = self.client().post('/questions', json=self.bad_request_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data["error"], 400)
+        self.assertEqual(data["message"], "Bad Request")
+        self.assertEqual(data["success"], False)
+
+
 
 
 # Make the tests conveniently executable
