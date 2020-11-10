@@ -69,16 +69,21 @@ def create_app(test_config=None):
   def get_questions():
     questions = Question.query.all()
     categories = Category.query.all()
-    result_questions = [question.format() for question in questions]
-    result_categories = get_result_categories(categories)
+    formatted_questions = [question.format() for question in questions]
+
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
+    result_questions = formatted_questions[start:end]
+    if len(result_questions) == 0:
+      abort(404)
+
+    result_categories = get_result_categories(categories)
     result_current_category = get_current_category(categories)
 
     return jsonify({
-      'questions': result_questions[start:end],
+      'questions': result_questions,
       'total_questions': len(result_questions),
       'categories': result_categories,
       'current_category': result_current_category
@@ -92,9 +97,16 @@ def create_app(test_config=None):
   '''
   @app.route('/questions/<question_id>', methods=['DELETE'])
   def delete_question(question_id):
-    question = Question.query.get(question_id)
-    question.delete()
-    return jsonify({'message': 'Question Deleted'})
+    try:
+      question = Question.query.filter(Question.id == question_id).one_or_none()
+
+      if question is None:
+        abort(404)
+
+      question.delete()
+      return jsonify({'message': 'Question Deleted'})
+    except:
+      abort(422)
   '''
   @TODO: 
   Create an endpoint to POST a new question, 
@@ -112,9 +124,12 @@ def create_app(test_config=None):
     category = request.json["category"]# request.json["category"] will be an integer which is the category id 
     difficulty = request.json["difficulty"]
 
-    question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
-    question.insert()
-    return jsonify({'message': 'Question Created'}), 201
+    try:
+      question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
+      question.insert()
+      return jsonify({'message': 'Question Created'}), 201
+    except:
+      abort(422)
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -132,6 +147,10 @@ def create_app(test_config=None):
     search = "%{}%".format(search_term)
     questions = Question.query.filter(Question.question.ilike(search)).all()
     result_questions = [question.format() for question in questions]
+
+    if len(result_questions) == 0:
+      abort(404)
+
     categories = Category.query.all()
     result_current_category = get_current_category(categories)
 
@@ -150,14 +169,18 @@ def create_app(test_config=None):
   '''
   @app.route('/categories/<category_id>/questions')
   def get_questions_by_category(category_id):
-    category = Category.query.get(category_id).format()
-    questions = Question.query.filter_by(category = category["id"])
-    formatted_questions = [question.format() for question in questions]
+    category = Category.query.filter(Category.id == category_id).one_or_none()
 
+    if category is None:
+      abort(404)
+
+    formatted_category = category.format()
+    questions = Question.query.filter_by(category = formatted_category["id"])
+    formatted_questions = [question.format() for question in questions]
     return jsonify({
       "questions": formatted_questions,
       "totalQuestions": len(formatted_questions),
-      "currentCategory": category["type"]
+      "currentCategory": formatted_category["type"]
     })
 
   '''
