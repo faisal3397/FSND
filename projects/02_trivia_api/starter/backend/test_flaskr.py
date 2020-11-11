@@ -63,8 +63,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["questions"])
         self.assertTrue(data["total_questions"])
     
-    def test_404_get_questions_beyond_valid_page(self):
-        res = self.client().get('/questions?page=1000')
+    def test_get_questions_exceeding_valid_page(self):
+        res = self.client().get('/questions?page=100')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -73,7 +73,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
 
     def test_delete_question(self):
-        res = self.client().delete('/questions/39')
+        res = self.client().delete('/questions/40')
         data = json.loads(res.data)
 
         question = Question.query.filter(Question.id == 24).one_or_none()
@@ -82,7 +82,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Question Deleted")
         self.assertEqual(question, None)
     
-    def test_404_if_question_does_not_exist(self):
+    def test_if_question_not_found(self):
         res = self.client().delete('/questions/1000')
         data = json.loads(res.data)
 
@@ -116,7 +116,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["questions"])
         self.assertTrue(data["totalQuestions"])
     
-    def test_404_search_not_found(self):
+    def test_search_result_not_found(self):
         res = self.client().post('/questions/search', json={"searchTerm": "dsgsfgerer"})
         data = json.loads(res.data)
 
