@@ -81,16 +81,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Not found")
         self.assertEqual(data["success"], False)
 
-    def test_delete_question(self):
-        res = self.client().delete('/questions/44')
-        data = json.loads(res.data)
-
-        question = Question.query.filter(Question.id == 44).one_or_none()
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["message"], "Question with ID: 44 is Deleted")
-        self.assertEqual(question, None)
-    
     def test_if_question_not_found(self):
         res = self.client().delete('/questions/1000')
         data = json.loads(res.data)
@@ -115,6 +105,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["error"], 400)
         self.assertEqual(data["message"], "Bad Request")
         self.assertEqual(data["success"], False)
+
+    def test_delete_question(self):
+        # Use the id of the question created in the create question test case
+        res = self.client().delete('/questions/23')
+        data = json.loads(res.data)
+
+        question = Question.query.filter(Question.id == 23).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["message"], "Question with ID: 23 is Deleted")
+        self.assertEqual(question, None)
     
     def test_search_question(self):
         res = self.client().post('/questions/search', json={"searchTerm": "title"})
