@@ -53,6 +53,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data["categories"])
 
+    def test_get_all_categories_not_found(self):
+        res = self.client().get('/category')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["error"], 404)
+        self.assertEqual(data["message"], "Not found")
+        self.assertEqual(data["success"], False)
+
     def test_get_all_questions(self):
         res = self.client().get('/questions')
         data = json.loads(res.data)
@@ -73,13 +82,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
 
     def test_delete_question(self):
-        res = self.client().delete('/questions/42')
+        res = self.client().delete('/questions/44')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 42).one_or_none()
+        question = Question.query.filter(Question.id == 44).one_or_none()
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data["message"], "Question with ID: 42 is Deleted")
+        self.assertEqual(data["message"], "Question with ID: 44 is Deleted")
         self.assertEqual(question, None)
     
     def test_if_question_not_found(self):
@@ -155,6 +164,15 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data["question"])
+
+    def test_play_quiz_bad_request(self):
+        res = self.client().post('/quizzes')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data["error"], 400)
+        self.assertEqual(data["message"], "Bad Request")
+        self.assertEqual(data["success"], False)
 
 
 

@@ -241,8 +241,13 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
-        previous_questions = request.json["previous_questions"]
-        quiz_category = request.json["quiz_category"]
+        body = request.get_json()
+
+        if body is None:
+            abort(400)
+
+        previous_questions = body.get("previous_questions", None)
+        quiz_category = body.get("quiz_category", None)
         questions = []
 
         if quiz_category["id"] == 0:
