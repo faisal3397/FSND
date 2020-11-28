@@ -21,13 +21,6 @@ db_drop_and_create_all()
 # ROUTES
 
 
-@app.route('/hello')
-@requires_auth('')
-def headers(payload):
-    print(payload)
-    return 'Access Granted'
-
-
 '''
 @TODO implement endpoint
     GET /drinks
