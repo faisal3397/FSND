@@ -174,7 +174,7 @@ def bad_request(error):
 
 
 '''
-@TODO implement error handler for 404
+@DONE implement error handler for 404
     error handler should conform to general task above 
 '''
 
@@ -189,7 +189,7 @@ def not_found(error):
 
 
 '''
-@TODO implement error handler for AuthError
+@DONE implement error handler for AuthError
     error handler should conform to general task above 
 '''
 
