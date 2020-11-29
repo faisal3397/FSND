@@ -37,7 +37,7 @@ def get_drinks():
     return jsonify({
         "success": True,
         "drinks": short_drinks
-    }), 200
+    })
 
 
 '''
@@ -58,18 +58,12 @@ def get_drinks_detail(jwt):
     return jsonify({
         "success": True,
         "drinks": long_drinks
-    }), 200
+    })
 
 
 '''
-@TODO implement endpoint
+@DONE implement endpoint
     POST /drinks
-        it should create a new row in the drinks table
-        it should require the 'post:drinks' permission
-        it should contain the drink.long() data representation
-        returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly 
-        created drink
-        or appropriate status code indicating reason for failure
 '''
 
 
@@ -87,15 +81,13 @@ def create_drink(jwt):
     try:
         drink = Drink(title=title, recipe=recipe_string)
         drink.insert()
+
         return jsonify({
             "success": True,
             "drinks": [drink.long()]
         })
     except():
-        return jsonify({
-            "success": False,
-            "drinks": 400
-        })
+        abort(400)
 
 
 '''
@@ -109,6 +101,32 @@ def create_drink(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+
+
+@app.route('/drinks/<int:drink_id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def edit_drink(jwt, drink_id):
+    body = request.get_json()
+    title = body.get("title")
+    recipe = body.get("recipe")
+    recipe_string = json.dumps(recipe)
+
+    try:
+        drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
+
+        if drink is None:
+            abort(404)
+
+        drink.title = title
+        drink.recipe = recipe_string
+        drink.update()
+
+        return jsonify({
+            "success": True,
+            "drinks": [drink.long()]
+        })
+    except():
+        abort(422)
 
 
 '''
